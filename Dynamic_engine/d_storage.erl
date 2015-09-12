@@ -11,6 +11,8 @@
 %% API
 -export([request/2]).
 -export([page/2]).
+-export([add/2]).
+-export([delete/2]).
 
 %% System include
 -include_lib("stdlib/include/qlc.hrl").
@@ -18,6 +20,23 @@
 %% Module Include Start
 -include("dynamic.hrl").
 %% Module Include End
+
+%% @spec delete(Record_name,Record_unique_id) -> true
+%% where
+%%      Record_name() = request | page
+%% @doc Dlete from storage requested row
+delete(request,Request_id) when is_binary(Request_id) -> ets:delete(?STORAGE_REQUESTS,Request_id);
+delete(page,Path) when is_list(Path) -> ets:delete(?STORAGE_PAGES,Path);
+delete(_,_) -> {error,?FUNCTION_NAME(),"Bad Arguments"}.
+
+%% @spec add(Record_name,Record) -> true | {error,Reason}
+%% where
+%%      Record_name() = request | page
+%%      Record() = record()
+%% @doc Write to storage specified information
+add(request,Request) when is_record(Request,request) -> ets:insert(?STORAGE_REQUESTS,Request);
+add(page,Page) when is_record(Page,page) -> ets:insert(?STORAGE_PAGES,Page);
+add(_,_) -> {error,?FUNCTION_NAME(),"Bad Arguments"}.
 
 %% @spec request(Request_id,Field_name) -> Field_value() | {error,Reason()}
 %% where
@@ -29,17 +48,17 @@ request(Request_id,Field_name) when is_binary(Request_id), is_atom(Field_name) -
 	Query_call = qlc:eval(Query),
 	case Query_call of
 		[] ->
-			{error,"Wrong request id"};
+			{error,?FUNCTION_NAME(),"Wrong request id"};
 		_ ->
 			[Request] = Query_call,
 			case Field_name of
 				path -> {_,_,Output,_,_} = Request,Output;
 				parameters -> {_,_,_,Output,_} = Request,Output;
 				nodes -> {_,_,_,_,Output} = Request,Output;
-				_ -> {error,"Wrong field name"}
+				_ -> {error,?FUNCTION_NAME(),"Wrong field name"}
 			end
 	end;
-request(_,_) -> {error,"Bad Arguments"}.
+request(_,_) -> {error,?FUNCTION_NAME(),"Bad Arguments"}.
 
 %% @spec request(Path,Field_name) -> Field_value() | {error,Reason()}
 %% where
@@ -51,7 +70,7 @@ page(Path,Field_name) when is_list(Path), is_atom(Field_name) ->
 	Query_call = qlc:eval(Query),
 	case Query_call of
 		[] ->
-			{error,"Wrong path"};
+			{error,?FUNCTION_NAME(),"Wrong path"};
 		_ ->
 			[Request] = Query_call,
 			case Field_name of
@@ -61,7 +80,7 @@ page(Path,Field_name) when is_list(Path), is_atom(Field_name) ->
 				template -> {_,_,_,_,_,Output,_} = Request,Output;
 				title -> {_,_,_,_,_,_,Output} = Request,Output;
 				default -> {_,_,Output,_,_,_,_} = Request,Output;
-				_ -> {error,"Wrong field name"}
+				_ -> {error,?FUNCTION_NAME(),"Wrong field name"}
 			end
 	end;
-page(_,_) -> {error,"Bad Arguments"}.
+page(_,_) -> {error,?FUNCTION_NAME(),"Bad Arguments"}.
