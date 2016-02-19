@@ -8,12 +8,13 @@
 %%%-------------------------------------------------------------------
 -module(aw_html).
 -author("Alexandr KIRILOV, http://alexandr.kirilov.me").
--vsn("0.0.3.242").
+-vsn("0.0.4.243").
 
 %% API
 -export([
 	link/2,
 	script/2,
+	style/1,
 	title/1
 ]).
 
@@ -41,6 +42,14 @@ script(js,{file_link,Url,Charset}) when is_list(Url), is_list(Charset) ->
 script(js,{script,Script}) when is_list(Script) ->
 	lists:concat(["<script>",Script,"</script>\n"]);
 script(_,_) -> "<script>Bad argument</script>".
+
+
+%%-----------------------------------
+%% @doc Return prepared for Yaws Appmod style tag
+-spec style(Style::unicode:chardata()) -> list().
+
+style(Style) when is_list(Style) -> lists:concat(["<style>",Style,"</style>\n"]);
+style(_) -> "<style>Bad arguments</style>\n".
 
 
 %%-----------------------------------
