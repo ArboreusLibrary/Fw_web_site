@@ -8,17 +8,17 @@
 %%%-------------------------------------------------------------------
 -module(aw_html).
 -author("Alexandr KIRILOV, http://alexandr.kirilov.me").
--vsn("0.0.7.248").
+-vsn("0.0.8.249").
 
 %% API
 -export([
 	tag_string/3,single_tag_string/2,
 	a/2,
 	li/2,
-	link/2,
+	link/1,
 	script/2,
-	style/1,
-	title/1
+	style/2,
+	title/2
 ]).
 
 
@@ -70,7 +70,8 @@ single_tag_string(_,_) -> "<make_tag_string>Bag_argument</make_tag_string>".
 		Attributes_proplist :: proplists:proplist(),
 		Text :: unicode:chardata().
 
-a(string,{Attributes_proplist,Value}) -> tag_string("a",Attributes_proplist,Value);
+a(string,{Attributes_proplist,Value}) ->
+	tag_string("a",Attributes_proplist,Value);
 a(tuple,{Attributes_proplist,Value}) when is_list(Attributes_proplist), is_list(Value) ->
 	{'a',Attributes_proplist,Value};
 a(_,_) -> "<a>Bad argument</a>".
@@ -84,7 +85,8 @@ a(_,_) -> "<a>Bad argument</a>".
 		Attributes_proplist :: proplists:proplist(),
 		Text :: unicode:chardata().
 
-li(string,{Attributes_proplist,Value}) -> tag_string("li",Attributes_proplist,Value);
+li(string,{Attributes_proplist,Value}) ->
+	tag_string("li",Attributes_proplist,Value);
 li(tuple,{Attributes_proplist,Value}) when is_list(Attributes_proplist), is_list(Value) ->
 	{'li',Attributes_proplist,Value};
 li(_,_) -> "<li>Bag argument</li>".
@@ -92,42 +94,53 @@ li(_,_) -> "<li>Bag argument</li>".
 
 %%-----------------------------------
 %% @doc Return prepared for Yaws Appmod link tag
--spec link(Type,File_path) -> list()
+-spec link(Attributes_proplist::proplists:proplist()) -> list().
+
+link(Attributes_proplist) when is_list(Attributes_proplist) ->
+	[single_tag_string("link",Attributes_proplist),"\n"];
+link(_) -> "<link>Bad argument</link>\n".
+
+
+%%-----------------------------------
+%% @doc Return prepared the tag scipt for Yaws appmode
+-spec script(Output_type,{Attributes_proplist,Text}) -> list() | tuple()
 	when
-		Type :: atom(),
-		File_path :: unicode:chardata().
+		Output_type :: string | tuple,
+		Attributes_proplist :: proplists:proplist(),
+		Text :: unicode:chardata().
 
-link(css,File_path) when is_list(File_path) ->
-	lists:concat(["<link href=\"",File_path,"\" rel=\"stylesheet\" type=\"text/css\">\n"]);
-link(_,_) -> "<link>Bad argument</link>\n".
+script(string,{Attributes_proplist,Value}) ->
+	tag_string("script",Attributes_proplist,Value);
+script(tuple,{Attributes_proplist,Value}) when is_list(Attributes_proplist), is_list(Value) ->
+	[{'script',Attributes_proplist,Value},"\n"];
+script(_,_) -> "<script>Bad argument</script>\n".
 
 
 %%-----------------------------------
-%% @doc Return prepared for Yaws Appmod script tag
--spec script(Type,Properties) -> list()
+%% @doc Return prepared the tag scipt for Yaws appmode
+-spec style(Output_type,{Attributes_proplist,Text}) -> list() | tuple()
 	when
-		Type :: atom(),
-		Properties :: any().
+		Output_type :: string | tuple,
+		Attributes_proplist :: proplists:proplist(),
+		Text :: unicode:chardata().
 
-script(js,{file_link,Url,Charset}) when is_list(Url), is_list(Charset) ->
-	lists:concat(["<script type=\"text/javascript\" src=\"",Url,"\" charset=\"",Charset,"\"></script>\n"]);
-script(js,{script,Script}) when is_list(Script) ->
-	lists:concat(["<script>",Script,"</script>\n"]);
-script(_,_) -> "<script>Bad argument</script>".
-
-
-%%-----------------------------------
-%% @doc Return prepared for Yaws Appmod style tag
--spec style(Style::unicode:chardata()) -> list().
-
-style(Style) when is_list(Style) -> lists:concat(["<style>",Style,"</style>\n"]);
-style(_) -> "<style>Bad arguments</style>\n".
+style(string,{Attributes_proplist,Value}) ->
+	[tag_string("style",Attributes_proplist,Value),"\n"];
+style(tuple,{Attributes_proplist,Value}) when is_list(Attributes_proplist), is_list(Value) ->
+	[{'style',Attributes_proplist,Value},"\n"];
+style(_,_) -> "<style>Bad argument</style>\n".
 
 
 %%-----------------------------------
-%% @doc Return prepared for Yaws Appmod title tag
--spec title(Title::unicode:chardata()) -> unicode:chardata().
+%% @doc Return prepared the tag scipt for Yaws appmode
+-spec title(Output_type,{Attributes_proplist,Text}) -> list() | tuple()
+	when
+		Output_type :: string | tuple,
+		Attributes_proplist :: proplists:proplist(),
+		Text :: unicode:chardata().
 
-title(Title) when is_list(Title) ->
-	lists:concat(["<title>",Title,"</title>\n"]);
-title(_) -> "<title>Bad argument</title>\n".
+title(string,{Attributes_proplist,Value}) ->
+	[tag_string("title",Attributes_proplist,Value),"\n"];
+title(tuple,{Attributes_proplist,Value}) when is_list(Attributes_proplist), is_list(Value) ->
+	[{'style',Attributes_proplist,Value},"\n"];
+title(_,_) -> "<title>Bad argument</title>\n".
