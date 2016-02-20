@@ -8,15 +8,36 @@
 %%%-------------------------------------------------------------------
 -module(aw_html).
 -author("Alexandr KIRILOV, http://alexandr.kirilov.me").
--vsn("0.0.4.243").
+-vsn("0.0.5.244").
 
 %% API
 -export([
+	a/2,
 	link/2,
 	script/2,
 	style/1,
 	title/1
 ]).
+
+
+%%-----------------------------------
+%% @doc Return prepared a tag for Yaws appmode. In case of usage string mode proplist
+%% should be {"String_attribute","String_value"}, in case of usage tuple mode
+%% proplist should be {atom_attribute,"String_value"}
+-spec a(Output_type,{Attributes_proplist,Text}) -> list() | tuple()
+	when
+		Output_type :: string | tuple,
+		Attributes_proplist :: proplists:proplist(),
+		Text :: unicode:chardata().
+
+a(string,{Attributes_proplist,Text}) when is_list(Attributes_proplist), is_list(Text) ->
+	lists:concat([
+		"<a ",[lists:concat([Attribute,"=\"",Value,"\" "])||{Attribute,Value} <- Attributes_proplist],
+		">",Text,"</a>"]);
+a(tuple,{Attributes_proplist,Text}) when is_list(Attributes_proplist), is_list(Text) ->
+	{'a',Attributes_proplist,Text};
+a(_,_) -> "<a>Bad argument</a>".
+
 
 %%-----------------------------------
 %% @doc Return prepared for Yaws Appmod link tag
