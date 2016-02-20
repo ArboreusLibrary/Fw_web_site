@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(aw_css).
 -author("Alexandr KIRILOV, http://alexandr.kirilov.me").
--vsn("0.0.1.251").
+-vsn("0.0.2.251").
 
 %% API
 -export([
@@ -37,10 +37,10 @@ style(from_file,File_path) ->
 	case a:read_file(File_path) of
 		{error,_Reason} -> "<style>Error: file read</style>";
 		File_data -> unicode:characters_to_list(
-			<<("<style>\n")/utf8,(File_data)/binary,("\n<style>\n")/utf8>>)
+			<<("<style>\n")/utf8,(File_data)/binary,("\n</style>\n")/utf8>>)
 	end;
 style(from_string,Css_string) when is_list(Css_string) ->
 	lists:concat(["<style>\n",Css_string,"\n</style>\n"]);
 style(from_binary,Css_binary) when is_binary(Css_binary) ->
-	unicode:characters_to_list(<<("<style>\n")/utf8,(Css_binary)/binary,("\n<style>\n")/utf8>>);
+	unicode:characters_to_list(<<("<style>\n")/utf8,(Css_binary)/binary,("\n</style>\n")/utf8>>);
 style(_,_) -> "<style class=\"css\">Bad arguments</style>".
