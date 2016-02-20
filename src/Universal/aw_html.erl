@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(aw_html).
 -author("Alexandr KIRILOV, http://alexandr.kirilov.me").
--vsn("0.0.8.249").
+-vsn("0.0.9.250").
 
 %% API
 -export([
@@ -36,8 +36,8 @@ tag_string(Tag_name,[],Value) when is_list(Tag_name), is_list(Value) ->
 	lists:concat(["<",Tag_name,">",Value,"</",Tag_name,">"]);
 tag_string(Tag_name,Attributes_proplist,Value) when is_list(Tag_name), is_list(Value) ->
 	lists:concat([
-		"<",Tag_name," ",
-		[lists:concat([Attribute,"=\"",Value,"\" "])||{Attribute,Value} <- Attributes_proplist],">",
+		"<",Tag_name,
+		[lists:concat([" ",Attribute,"=\"",Attr_value,"\""])||{Attribute,Attr_value} <- Attributes_proplist],">",
 		Value,"</",Tag_name,">"
 	]);
 tag_string(_,_,_) -> "<make_tag_string>Bag_argument</make_tag_string>".
@@ -56,8 +56,8 @@ single_tag_string(Tag_name,[]) when is_list(Tag_name) ->
 	lists:concat(["<",Tag_name,">"]);
 single_tag_string(Tag_name,Attributes_proplist) when is_list(Tag_name) ->
 	lists:concat([
-		"<",Tag_name," ",
-		[lists:concat([Attribute,"=\"",Value,"\" "])||{Attribute,Value} <- Attributes_proplist],">"
+		"<",Tag_name,
+		[lists:concat([" ",Attribute,"=\"",Value,"\""])||{Attribute,Value} <- Attributes_proplist],">"
 	]);
 single_tag_string(_,_) -> "<make_tag_string>Bag_argument</make_tag_string>".
 
