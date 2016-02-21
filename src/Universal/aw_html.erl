@@ -152,7 +152,7 @@ title(_,_) -> "<title>Bad argument</title>\n".
 -spec list(Type,{List_tag,Attributes_ul,Content}) -> list()
 	when
 		Type :: string | tuple,
-		List_tag :: atom(), unicode:latin1_chardata(),
+		List_tag :: atom() | unicode:latin1_chardata(),
 		Attributes_ul :: proplists:proplist(),
 		Content :: proplists:proplist().
 
