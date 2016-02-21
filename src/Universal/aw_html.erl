@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(aw_html).
 -author("Alexandr KIRILOV, http://alexandr.kirilov.me").
--vsn("0.0.9.250").
+-vsn("0.0.10.254").
 
 %% API
 -export([
@@ -18,7 +18,8 @@
 	link/1,
 	script/2,
 	style/2,
-	title/2
+	title/2,
+	list/2
 ]).
 
 
@@ -102,7 +103,7 @@ link(_) -> "<link>Bad argument</link>\n".
 
 
 %%-----------------------------------
-%% @doc Return prepared the tag scipt for Yaws appmode
+%% @doc Return prepared the tag script for Yaws appmode
 -spec script(Output_type,{Attributes_proplist,Text}) -> list() | tuple()
 	when
 		Output_type :: string | tuple,
@@ -117,7 +118,7 @@ script(_,_) -> "<script>Bad argument</script>\n".
 
 
 %%-----------------------------------
-%% @doc Return prepared the tag scipt for Yaws appmode
+%% @doc Return prepared the tag style for Yaws appmode
 -spec style(Output_type,{Attributes_proplist,Text}) -> list() | tuple()
 	when
 		Output_type :: string | tuple,
@@ -132,7 +133,7 @@ style(_,_) -> "<style>Bad argument</style>\n".
 
 
 %%-----------------------------------
-%% @doc Return prepared the tag scipt for Yaws appmode
+%% @doc Return prepared the tag title for Yaws appmode
 -spec title(Output_type,{Attributes_proplist,Text}) -> list() | tuple()
 	when
 		Output_type :: string | tuple,
@@ -144,3 +145,28 @@ title(string,{Attributes_proplist,Value}) ->
 title(tuple,{Attributes_proplist,Value}) when is_list(Attributes_proplist), is_list(Value) ->
 	[{'style',Attributes_proplist,Value},"\n"];
 title(_,_) -> "<title>Bad argument</title>\n".
+
+
+%%-----------------------------------
+%% @doc Return prepared the tag ul for Yaws appmode
+-spec list(Type,{List_tag,Attributes_ul,Content}) -> list()
+	when
+		Type :: string | tuple,
+		List_tag :: atom(), unicode:latin1_chardata(),
+		Attributes_ul :: proplists:proplist(),
+		Content :: proplists:proplist().
+
+list(string,{List_tag,Attributes_ul,Content})
+	when is_list(List_tag), is_list(Attributes_ul), is_list(Content) ->
+	tag_string(
+		List_tag,Attributes_ul,
+		[lists:concat(
+			[tag_string("li",Attributes_li,Content_li),"\n"])||{Attributes_li,Content_li} <- Content]
+	);
+list(tuple,{List_tag,Attributes_ul,Content})
+	when is_atom(List_tag), is_list(Attributes_ul), is_list(Content) ->
+	[{List_tag,Attributes_ul,
+		[{'li',Attributes_li,Content_li}||{Attributes_li,Content_li} <- Content]},"\n"];
+list(string,{_,_,[]}) -> "<ul>Content should not be empty</ul>\n";
+list(tuple,{_,_,[]}) -> "<ul>Content should not be empty</ul>\n";
+list(_,_) -> "<ul>Bad argument</ul>\n".
