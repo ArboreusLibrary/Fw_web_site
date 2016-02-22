@@ -8,165 +8,81 @@
 %%%-------------------------------------------------------------------
 -module(aw_html).
 -author("Alexandr KIRILOV, http://alexandr.kirilov.me").
--vsn("0.0.10.254").
+-vsn("0.0.11.258").
 
 %% API
 -export([
-	tag_string/3,single_tag_string/2,
-	a/2,
-	li/2,
-	link/1,
-	script/2,
-	style/2,
-	title/2,
-	list/2
+	tag/4
 ]).
 
 
 %%-----------------------------------
-%% @doc Return a tag string. In case of usage string mode proplist
-%% should be {"String_attribute","String_value"}, in case of usage tuple mode
-%% proplist should be {atom_attribute,"String_value"}
--spec tag_string(Tag_name,Attributes_proplist,Value) -> list()
+%% @doc Wraper function for makin tag, return unicode binary or unicode string
+-spec tag(Type,Name,Attributes,Value) -> unicode:chardata() | unicode:unicode_binary()
 	when
-		Tag_name :: unicode:latin1_chardata(),
-		Attributes_proplist :: proplists:proplist(),
+		Type :: string | binary,
+		Name :: unicode:latin1_chardata() | unicode:unicode_binary(),
+		Attributes :: proplists:proplist(),
+		Value :: unicode:chardata() | unicode:unicode_binary().
+
+tag(string,Name,Attributes,Value) when	is_list(Name), is_list(Attributes), is_list(Value) ->
+	make_tag_string(Name,Attributes,Value);
+tag(binary,Name,Attributes,Value) when	is_binary(Name), is_list(Attributes), is_binary(Value) ->
+	make_tag_binary(Name,Attributes,Value);
+tag(Type,Name,_,_) ->
+	lists:concat([
+		"<",a:to_string(Name)," class=",a:to_string(Type),
+		"\">Bag_argument</",a:to_string(Name),">"
+	]).
+
+
+%%-----------------------------------
+%% @doc Return uncode string within prepared tag for Yaws appmod
+-spec make_tag_string(Name,Attributes,Value) -> unicode:chardata()
+	when
+		Name :: unicode:latin1_chardata(),
+		Attributes :: proplists:proplist(),
 		Value :: unicode:chardata().
 
-tag_string(Tag_name,[],Value) when is_list(Tag_name), is_list(Value) ->
-	lists:concat(["<",Tag_name,">",Value,"</",Tag_name,">"]);
-tag_string(Tag_name,Attributes_proplist,Value) when is_list(Tag_name), is_list(Value) ->
+make_tag_string(Name,[],"single_tag") -> lists:concat(["<",Name,">"]);
+make_tag_string(Name,Attributes,"single_tag") ->
 	lists:concat([
-		"<",Tag_name,
-		[lists:concat([" ",Attribute,"=\"",Attr_value,"\""])||{Attribute,Attr_value} <- Attributes_proplist],">",
-		Value,"</",Tag_name,">"
+		"<",Name,[lists:concat([" ",Attribute,"=\"",Attribute_value,"\""])||
+			{Attribute,Attribute_value} <- Attributes],">"
 	]);
-tag_string(_,_,_) -> "<make_tag_string>Bag_argument</make_tag_string>".
-
-
-%%-----------------------------------
-%% @doc Return a tag string. In case of usage string mode proplist
-%% should be {"String_attribute","String_value"}, in case of usage tuple mode
-%% proplist should be {atom_attribute,"String_value"}
--spec single_tag_string(Tag_name,Attributes_proplist) -> list()
-	when
-		Tag_name :: unicode:latin1_chardata(),
-		Attributes_proplist :: proplists:proplist().
-
-single_tag_string(Tag_name,[]) when is_list(Tag_name) ->
-	lists:concat(["<",Tag_name,">"]);
-single_tag_string(Tag_name,Attributes_proplist) when is_list(Tag_name) ->
+make_tag_string(Name,[],Value) -> lists:concat(["<",Name,">",Value,"</",Name,">"]);
+make_tag_string(Name,Attributes,Value) ->
 	lists:concat([
-		"<",Tag_name,
-		[lists:concat([" ",Attribute,"=\"",Value,"\""])||{Attribute,Value} <- Attributes_proplist],">"
-	]);
-single_tag_string(_,_) -> "<make_tag_string>Bag_argument</make_tag_string>".
+		"<",Name,[lists:concat([" ",Attribute,"=\"",Attribute_value,"\""])||
+			{Attribute,Attribute_value} <- Attributes],">",Value,"</",Name,">"
+	]).
 
 
 %%-----------------------------------
-%% @doc Return prepared the tag a for Yaws appmode
--spec a(Output_type,{Attributes_proplist,Text}) -> list() | tuple()
+%% @doc Return binary within prepared tag for Yaws appmod
+-spec make_tag_binary(Name,Attributes,Value) -> unicode:unicode_binary()
 	when
-		Output_type :: string | tuple,
-		Attributes_proplist :: proplists:proplist(),
-		Text :: unicode:chardata().
+		Name :: unicode:unicode_binary(),
+		Attributes :: proplists:proplist(),
+		Value :: unicode:unicode_binary().
 
-a(string,{Attributes_proplist,Value}) ->
-	tag_string("a",Attributes_proplist,Value);
-a(tuple,{Attributes_proplist,Value}) when is_list(Attributes_proplist), is_list(Value) ->
-	{'a',Attributes_proplist,Value};
-a(_,_) -> "<a>Bad argument</a>".
-
-
-%%-----------------------------------
-%% @doc Return prepared the tag li for Yaws appmode
--spec li(Output_type,{Attributes_proplist,Text}) -> list() | tuple()
-	when
-		Output_type :: string | tuple,
-		Attributes_proplist :: proplists:proplist(),
-		Text :: unicode:chardata().
-
-li(string,{Attributes_proplist,Value}) ->
-	tag_string("li",Attributes_proplist,Value);
-li(tuple,{Attributes_proplist,Value}) when is_list(Attributes_proplist), is_list(Value) ->
-	{'li',Attributes_proplist,Value};
-li(_,_) -> "<li>Bag argument</li>".
-
-
-%%-----------------------------------
-%% @doc Return prepared for Yaws Appmod link tag
--spec link(Attributes_proplist::proplists:proplist()) -> list().
-
-link(Attributes_proplist) when is_list(Attributes_proplist) ->
-	[single_tag_string("link",Attributes_proplist),"\n"];
-link(_) -> "<link>Bad argument</link>\n".
-
-
-%%-----------------------------------
-%% @doc Return prepared the tag script for Yaws appmode
--spec script(Output_type,{Attributes_proplist,Text}) -> list() | tuple()
-	when
-		Output_type :: string | tuple,
-		Attributes_proplist :: proplists:proplist(),
-		Text :: unicode:chardata().
-
-script(string,{Attributes_proplist,Value}) ->
-	tag_string("script",Attributes_proplist,Value);
-script(tuple,{Attributes_proplist,Value}) when is_list(Attributes_proplist), is_list(Value) ->
-	[{'script',Attributes_proplist,Value},"\n"];
-script(_,_) -> "<script>Bad argument</script>\n".
-
-
-%%-----------------------------------
-%% @doc Return prepared the tag style for Yaws appmode
--spec style(Output_type,{Attributes_proplist,Text}) -> list() | tuple()
-	when
-		Output_type :: string | tuple,
-		Attributes_proplist :: proplists:proplist(),
-		Text :: unicode:chardata().
-
-style(string,{Attributes_proplist,Value}) ->
-	[tag_string("style",Attributes_proplist,Value),"\n"];
-style(tuple,{Attributes_proplist,Value}) when is_list(Attributes_proplist), is_list(Value) ->
-	[{'style',Attributes_proplist,Value},"\n"];
-style(_,_) -> "<style>Bad argument</style>\n".
-
-
-%%-----------------------------------
-%% @doc Return prepared the tag title for Yaws appmode
--spec title(Output_type,{Attributes_proplist,Text}) -> list() | tuple()
-	when
-		Output_type :: string | tuple,
-		Attributes_proplist :: proplists:proplist(),
-		Text :: unicode:chardata().
-
-title(string,{Attributes_proplist,Value}) ->
-	[tag_string("title",Attributes_proplist,Value),"\n"];
-title(tuple,{Attributes_proplist,Value}) when is_list(Attributes_proplist), is_list(Value) ->
-	[{'style',Attributes_proplist,Value},"\n"];
-title(_,_) -> "<title>Bad argument</title>\n".
-
-
-%%-----------------------------------
-%% @doc Return prepared the tag ul for Yaws appmode
--spec list(Type,{List_tag,Attributes_ul,Content}) -> list()
-	when
-		Type :: string | tuple,
-		List_tag :: atom() | unicode:latin1_chardata(),
-		Attributes_ul :: proplists:proplist(),
-		Content :: proplists:proplist().
-
-list(string,{List_tag,Attributes_ul,Content})
-	when is_list(List_tag), is_list(Attributes_ul), is_list(Content) ->
-	tag_string(
-		List_tag,Attributes_ul,
-		[lists:concat(
-			[tag_string("li",Attributes_li,Content_li),"\n"])||{Attributes_li,Content_li} <- Content]
-	);
-list(tuple,{List_tag,Attributes_ul,Content})
-	when is_atom(List_tag), is_list(Attributes_ul), is_list(Content) ->
-	[{List_tag,Attributes_ul,
-		[{'li',Attributes_li,Content_li}||{Attributes_li,Content_li} <- Content]},"\n"];
-list(string,{_,_,[]}) -> "<ul>Content should not be empty</ul>\n";
-list(tuple,{_,_,[]}) -> "<ul>Content should not be empty</ul>\n";
-list(_,_) -> "<ul>Bad argument</ul>\n".
+make_tag_binary(Name,[],<<("single_tag")/utf8>>) -> <<("<")/utf8,(Name)/binary,(">")/utf8>>;
+make_tag_binary(Name,Attributes,<<("single_tag")/utf8>>) ->
+	<<("<")/utf8,(Name)/binary,
+		(list_to_binary([
+			<<(" ")/utf8,(Attribute_name)/binary,
+				("=\"")/utf8,(Attribute_value)/binary,("\"")/utf8>>||
+			{Attribute_name,Attribute_value} <- Attributes
+		]))/binary,
+		(">")/utf8>>;
+make_tag_binary(Name,[],Value) ->
+	<<("<")/utf8,(Name)/binary,(">")/utf8,
+		(Value)/binary,("</")/utf8,(Name)/binary,(">")/utf8>>;
+make_tag_binary(Name,Attributes,Value) ->
+	<<("<")/utf8,(Name)/binary,
+		(list_to_binary([
+			<<(" ")/utf8,(Attribute_name)/binary,
+				("=\"")/utf8,(Attribute_value)/binary,("\"")/utf8>>||
+			{Attribute_name,Attribute_value} <- Attributes
+		]))/binary,
+		(">")/utf8,(Value)/binary,("</")/utf8,(Name)/binary,(">")/utf8>>.
