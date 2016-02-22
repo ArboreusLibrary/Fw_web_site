@@ -153,5 +153,4 @@ doctype(string,html5) ->
 	"<!DOCTYPE html>";
 doctype(binary,html5) ->
 	<<("<!DOCTYPE html>")/utf8>>;
-
 doctype(_,_) -> "<!DOCTYPE error: bad arguments>".
