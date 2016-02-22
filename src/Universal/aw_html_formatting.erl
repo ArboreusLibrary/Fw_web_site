@@ -8,6 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(aw_html_formatting).
 -author("Alexandr KIRILOV, http://alexandr.kirilov.me").
+-vsn("0.0.1.259").
 
 %% API
 -export([
