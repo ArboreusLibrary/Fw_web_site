@@ -28,7 +28,7 @@
 		Menu_schema :: proplists:proplist().
 
 ol(binary,Menu_attributes,Menu_schema) ->
-	do(binary,a,<<("ol")/utf8>>,{Menu_attributes,Menu_schema});
+	do(binary,li_a,<<("ol")/utf8>>,{Menu_attributes,Menu_schema});
 ol(string,Menu_attributes,Menu_schema) ->
 	do(string,li_a,"ol",{Menu_attributes,Menu_schema});
 ol(tuple,Menu_attributes,Menu_schema) ->
