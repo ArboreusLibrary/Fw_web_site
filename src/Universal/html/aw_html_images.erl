@@ -8,6 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(aw_html_images).
 -author("Alexandr KIRILOV, http://alexandr.kirilov.me").
+-vsn("0.0.1.268").
 
 %% API
 -export([
