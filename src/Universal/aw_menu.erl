@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(aw_menu).
 -author("Alexandr KIRILOV, http://alexandr.kirilov.me").
--vsn("0.0.5.271").
+-vsn("0.0.6.273").
 
 %% API
 -export([
@@ -114,7 +114,7 @@ do(binary,a,Wrap_tag,{Menu_attributes,Menu_schema})
 					{Attrib_name,Attrib_value} <- A_attributes
 				]))/binary,(">"),(A_value)/binary,("</a>\n")/utf8>>||
 			{A_attributes,A_value} <- Menu_schema
-		]))/binary,("</")/utf8,(Wrap_tag)/binary,(">")/utf8>>;
+		]))/binary,("</")/utf8,(Wrap_tag)/binary,(">\n")/utf8>>;
 do(binary,li_a,Wrap_tag,{Menu_attributes,Menu_schema})
 	when
 		is_binary(Wrap_tag),is_list(Menu_attributes),
@@ -132,7 +132,7 @@ do(binary,li_a,Wrap_tag,{Menu_attributes,Menu_schema})
 					{Attrib_name,Attrib_value} <- A_attributes
 				]))/binary,(">"),(A_value)/binary,("</a></li>\n")/utf8>>||
 			{A_attributes,A_value} <- Menu_schema
-		]))/binary,("</")/utf8,(Wrap_tag)/binary,(">")/utf8>>;
+		]))/binary,("</")/utf8,(Wrap_tag)/binary,(">\n")/utf8>>;
 do(binary,button,Wrap_tag,{Menu_attributes,Menu_schema})
 	when
 		is_binary(Wrap_tag),is_list(Menu_attributes),
@@ -150,7 +150,25 @@ do(binary,button,Wrap_tag,{Menu_attributes,Menu_schema})
 					{Attrib_name,Attrib_value} <- A_attributes
 				]))/binary,(">"),(A_value)/binary,("</button>\n")/utf8>>||
 			{A_attributes,A_value} <- Menu_schema
-		]))/binary,("</")/utf8,(Wrap_tag)/binary,(">")/utf8>>;
+		]))/binary,("</")/utf8,(Wrap_tag)/binary,(">\n")/utf8>>;
+do(binary,menuitem,Wrap_tag,{Menu_attributes,Menu_schema})
+	when
+		is_binary(Wrap_tag),is_list(Menu_attributes),
+		is_list(Menu_schema) ->
+	<<("<")/utf8,(Wrap_tag)/binary,
+		(list_to_binary([
+			<<(" ")/utf8,(Attribute_name)/binary,("=\"")/utf8,
+				(Attribute_value)/binary,("\"")/utf8>>||
+			{Attribute_name,Attribute_value} <- Menu_attributes
+		]))/binary,(">\n")/utf8,
+		(list_to_binary([
+			<<("<menuitem")/utf8,
+				(list_to_binary([
+					<<(" ")/utf8,(Attrib_name)/binary,("=\"")/utf8,(Attrib_value)/binary,("\"")/utf8>> ||
+					{Attrib_name,Attrib_value} <- A_attributes
+				]))/binary,(">"),(A_value)/binary,("</menuitem>\n")/utf8>>||
+			{A_attributes,A_value} <- Menu_schema
+		]))/binary,("</")/utf8,(Wrap_tag)/binary,(">\n")/utf8>>;
 do(string,a,Wrap_tag,{Menu_attributes,Menu_schema})
 	when
 		is_list(Wrap_tag),is_list(Menu_attributes),
@@ -193,6 +211,20 @@ do(string,button,Wrap_tag,{Menu_attributes,Menu_schema})
 		])||{A_attributes,A_value} <- Menu_schema],
 		"</",Wrap_tag,">\n"
 	]);
+do(string,menuitem,Wrap_tag,{Menu_attributes,Menu_schema})
+	when
+		is_list(Wrap_tag),is_list(Menu_attributes),
+		is_list(Menu_schema) ->
+	lists:concat([
+		"<",Wrap_tag,[lists:concat([" ",Attribute_name,"=\"",Attribute_value,"\""])||
+			{Attribute_name,Attribute_value} <- Menu_attributes],">\n",
+		[lists:concat([
+			"<menuitem",[lists:concat([" ",Atrib_name,"=\"",Attrib_value,"\""])||
+				{Atrib_name,Attrib_value} <- A_attributes],">",
+			A_value,"</menuitem>\n"
+		])||{A_attributes,A_value} <- Menu_schema],
+		"</",Wrap_tag,">\n"
+	]);
 do(tuple,a,Wrap_tag,{Menu_attributes,Menu_schema})
 	when
 		is_atom(Wrap_tag),is_list(Menu_attributes),
@@ -210,5 +242,11 @@ do(tuple,button,Wrap_tag,{Menu_attributes,Menu_schema})
 		is_atom(Wrap_tag),is_list(Menu_attributes),
 		is_list(Menu_schema) ->
 	[{Wrap_tag,Menu_attributes,[{'button',Item_attributes,Item_content}||
+		{Item_attributes,Item_content} <- Menu_schema]},"\n"];
+do(tuple,menuitem,Wrap_tag,{Menu_attributes,Menu_schema})
+	when
+		is_atom(Wrap_tag),is_list(Menu_attributes),
+		is_list(Menu_schema) ->
+	[{Wrap_tag,Menu_attributes,[{'menuitem',Item_attributes,Item_content}||
 		{Item_attributes,Item_content} <- Menu_schema]},"\n"];
 do(_,_,_,_) -> "<menu>Bad argument</menu>\n".
