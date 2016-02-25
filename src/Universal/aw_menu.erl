@@ -8,16 +8,33 @@
 %%%-------------------------------------------------------------------
 -module(aw_menu).
 -author("Alexandr KIRILOV, http://alexandr.kirilov.me").
--vsn("0.0.4.264").
+-vsn("0.0.5.271").
 
 %% API
 -export([
 	do/4,
 	menu/3,
 	ul/3,
-	ol/3
+	ol/3,
+	nav/3
 ]).
 
+
+%%-----------------------------------
+%% @doc Return composed menu inside nav tag
+-spec nav(Type,Menu_attributes,Menu_schema) -> list()
+	when
+		Type :: binary | string | tuple,
+		Menu_attributes :: proplists:proplist(),
+		Menu_schema :: proplists:proplist().
+
+nav(binary,Menu_attributes,Menu_schema) ->
+	do(binary,a,<<("nav")/utf8>>,{Menu_attributes,Menu_schema});
+nav(string,Menu_attributes,Menu_schema) ->
+	do(string,a,"nav",{Menu_attributes,Menu_schema});
+nav(tuple,Menu_attributes,Menu_schema) ->
+	do(tuple,a,'nav',{Menu_attributes,Menu_schema});
+nav(_,_,_) -> "<nav>Bad arguments</nav>\n".
 
 %%-----------------------------------
 %% @doc Return composed menu inside ol tag
@@ -32,7 +49,8 @@ ol(binary,Menu_attributes,Menu_schema) ->
 ol(string,Menu_attributes,Menu_schema) ->
 	do(string,li_a,"ol",{Menu_attributes,Menu_schema});
 ol(tuple,Menu_attributes,Menu_schema) ->
-	do(tuple,li_a,'ol',{Menu_attributes,Menu_schema}).
+	do(tuple,li_a,'ol',{Menu_attributes,Menu_schema});
+ol(_,_,_) -> "<ol>Bad arguments</ol\n>".
 
 %%-----------------------------------
 %% @doc Return composed menu inside ul tag
@@ -47,7 +65,8 @@ ul(binary,Menu_attributes,Menu_schema) ->
 ul(string,Menu_attributes,Menu_schema) ->
 	do(string,li_a,"ul",{Menu_attributes,Menu_schema});
 ul(tuple,Menu_attributes,Menu_schema) ->
-	do(tuple,li_a,'ul',{Menu_attributes,Menu_schema}).
+	do(tuple,li_a,'ul',{Menu_attributes,Menu_schema});
+ul(_,_,_) -> "<ul>Bad arguments</ul>\n".
 
 
 %%-----------------------------------
@@ -64,7 +83,8 @@ menu(binary,Anchor_type,{Menu_attributes,Menu_schema}) ->
 menu(string,Anchor_type,{Menu_attributes,Menu_schema}) ->
 	do(string,Anchor_type,"menu",{Menu_attributes,Menu_schema});
 menu(tuple,Anchor_type,{Menu_attributes,Menu_schema}) ->
-	do(tuple,Anchor_type,'menu',{Menu_attributes,Menu_schema}).
+	do(tuple,Anchor_type,'menu',{Menu_attributes,Menu_schema});
+menu(_,_,_) -> "<menu>Bad arguments</menu>\n".
 
 
 %%-----------------------------------
