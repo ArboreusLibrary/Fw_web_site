@@ -12,8 +12,32 @@
 
 %% API
 -export([
-	doctype/2
+	doctype/2,
+	br/2,
+	hr/2
 ]).
+
+
+%%-----------------------------------
+%% @doc Return unicode string or unicode binary within <br />
+-spec br(Type,Attributes) -> unicode:chardata() | unicode:latin1_binary()
+	when
+		Type :: string | binary,
+		Attributes :: proplists:proplist().
+
+br(string,Attributes) -> aw_xhtml:tag(string,"br",Attributes);
+br(binary,Attributes) -> aw_xhtml:tag(binary,<<("br")/utf8>>,Attributes).
+
+
+%%-----------------------------------
+%% @doc Return unicode string or unicode binary within <hr />
+-spec hr(Type,Attributes) -> unicode:chardata() | unicode:latin1_binary()
+	when
+		Type :: string | binary,
+		Attributes :: proplists:proplist().
+
+hr(string,Attributes) -> aw_xhtml:tag(string,"hr",Attributes);
+hr(binary,Attributes) -> aw_xhtml:tag(binary,<<("hr")/utf8>>,Attributes).
 
 
 %%-----------------------------------
