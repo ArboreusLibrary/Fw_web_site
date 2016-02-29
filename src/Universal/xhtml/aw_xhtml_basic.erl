@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(aw_xhtml_basic).
 -author("Alexandr KIRILOV, http://alexandr.kirilov.me").
--vsn("0.0.1.256").
+-vsn("0.0.2.278").
 
 %% API
 -export([

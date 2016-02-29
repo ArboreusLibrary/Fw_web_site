@@ -8,6 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(aw_xhtml_tables).
 -author("Alexandr KIRILOV, http://alexandr.kirilov.me").
+-vsn("0.0.1.278").
 
 %% API
 -export([
